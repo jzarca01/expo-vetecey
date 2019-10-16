@@ -1,0 +1,2 @@
+export const GMAPS_APIKEY = "AIzaSyD1q6iI1c4XGqrbKGBPZfO2bnRTRVaRg04";
+export const GEOCODE_APIKEY = "AIzaSyA4ubUYp1ja0b6QqdeEMLBWI3s91NCwlHU";
