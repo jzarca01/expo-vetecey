@@ -5,8 +5,8 @@ import AssetMap from "../config/AssetMap";
 
 export default class SearchResultsRow extends Component {
   static defaultProps = {
-    icon: "home",
-    title: "Home",
+    icon: "recent",
+    home: "home",
     subtitle: "Earth"
   };
 

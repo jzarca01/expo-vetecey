@@ -3,17 +3,32 @@ import { FlatList, StyleSheet, TouchableHighlight } from "react-native";
 
 import SearchResultsRow from "./SearchResultsRow";
 
-const SearchResultsList = ({ list, onPressResult }) => {
+const SearchResultsList = ({
+  list,
+  isRecentList,
+  onPressResult,
+  fetchDetails
+}) => {
   renderRow = ({ item, index }) => {
-    const { title, description, subtitle, icon } = item;
+    const { title, address, icon, place_id, placeId } = item;
 
     return (
-      <TouchableHighlight onPress={onPressResult}>
+      <TouchableHighlight
+        onPress={async () => {
+          let touchedItem = item;
+          const detailedItem = await fetchDetails(
+            isRecentList ? placeId : place_id
+          );
+          touchedItem = { ...touchedItem, ...detailedItem };
+          console.log("iteù", touchedItem);
+          return onPressResult(touchedItem, isRecentList);
+        }}
+      >
         <SearchResultsRow
           key={index}
-          title={title ? title : description}
+          title={isRecentList ? address : title}
           subtitle={""}
-          icon={icon}
+          icon={isRecentList ? null : icon}
         />
       </TouchableHighlight>
     );
@@ -25,7 +40,7 @@ const SearchResultsList = ({ list, onPressResult }) => {
       style={styles.container}
       data={list}
       renderItem={this.renderRow}
-      keyExtractor={item => item.id}
+      keyExtractor={item => (item.placeId ? item.placeId : item.place_id)}
     />
   );
 };

@@ -10,6 +10,10 @@ const initialState = {
   isLocationFound: false,
   isLocationError: false,
   currentLocation: {},
+  lastLocation: {
+      latitude: 48.503364,
+      longitude: -0.127625
+  },
   endLocation: {}
 };
 

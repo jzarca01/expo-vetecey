@@ -5,12 +5,18 @@ import { Actions } from "react-native-router-flux";
 import MapView from "react-native-maps";
 import { GoogleAutoComplete } from "react-native-google-autocomplete";
 
-import Constants from 'expo-constants';
-import * as Location from 'expo-location';
-import * as Permissions from 'expo-permissions';
+import Constants from "expo-constants";
+import * as Location from "expo-location";
+import * as Permissions from "expo-permissions";
 
 import geocoder from "../api/geocoder";
 import { GMAPS_APIKEY } from "../api/keys";
+
+import {
+  setFormattedLocation,
+  pickHistoryLocation,
+  setLocationError
+} from "../actions/map.actions";
 
 import {
   LocationButtonGroup,
@@ -20,66 +26,69 @@ import {
   NavigationIcon
 } from "../components";
 
-const mapStateToProps = state => ({
-  recentLocations: state.recentLocations,
-  shortcutLocations: state.recentLocations && state.recentLocations.length ? state.recentLocations.slice(0, 3) : []
-});
-
 class Main extends Component {
   constructor(props) {
     super(props);
+    const { lastLocation } = this.props;
     this.state = {
       searchResultsOpen: false,
       sourceText: "Position actuelle",
       destinationText: "",
-      position: {
-        latitude: 48.503364,
-        longitude: -0.127625
-      },
+      position: lastLocation,
       region: {
-        latitude: 48.503364,
-        longitude: -0.127625,
+        ...lastLocation,
         latitudeDelta: 0.005,
         longitudeDelta: 0.005
-      },
-      lastPosition: {}
+      }
     };
     this.watchID = null;
   }
 
   componentWillUnmount() {
-    this.watchID != null && Geolocation.clearWatch(this.watchID);
+    this.clearWatch();
+  }
+
+  async startWatch() {
+    this.watchID = await Location.watchPositionAsync(
+      {
+        accuracy: 6, // Accuracy.BestForNavigation
+        distanceInterval: 30000 // in meters
+      },
+      async position => await this.getCurrentLocation(position)
+    );
+  }
+
+  clearWatch() {
+    this.watchID != null && this.watchID.remove();
   }
 
   getCurrentLocation = async position => {
+    const { setFormattedLocation } = this.props;
     const { coords } = position;
     const { latitude, longitude } = coords;
     const geo = await geocoder.fromLatLng(latitude, longitude);
-    /*const selectedAddress = {
-      lat: latitude,
-      lng: longitude,
-    };*/
+    const selectedAddress = {
+      ...coords,
+      ...geo.results[0]
+    };
     this.setState({
-      position: {
-        latitude: latitude,
-        longitude: longitude,
-        ...coords,
-        ...geo.results[0]
-      },
+      position: selectedAddress,
       sourceText: geo.results[0].formatted_address,
       region: {
         ...this.state.region,
-        latitude: latitude,
-        longitude: longitude
+        latitude,
+        longitude
       }
     });
     console.log("position", this.state.position);
-  }
+    setFormattedLocation(selectedAddress);
+  };
 
   componentDidMount() {
-    if (Platform.OS === 'android' && !Constants.isDevice) {
+    if (Platform.OS === "android" && !Constants.isDevice) {
       this.setState({
-        errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
+        errorMessage:
+          "Oops, this will not work on Sketch in an Android emulator. Try it on your device!"
       });
     } else {
       this.getLocationAsync();
@@ -87,26 +96,30 @@ class Main extends Component {
   }
 
   getLocationAsync = async () => {
+    const { setLocationError } = this.props;
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
-    if (status !== 'granted') {
+    if (status !== "granted") {
       this.setState({
-        errorMessage: 'Permission to access location was denied',
+        errorMessage: "Permission to access location was denied"
       });
+      setLocationError();
     }
-    let position = await Location.getCurrentPositionAsync({ 
+    let position = await Location.getCurrentPositionAsync({
       accuracy: 6, // Accuracy.BestForNavigation
-      maximumAge: 20000 // in ms
+      maximumAge: 30000 // in ms
     });
-    await this.getCurrentLocation(position);    
-    this.watchID = Location.watchPositionAsync({
-      accuracy: 6, // Accuracy.BestForNavigation
-      timeInterval: 20000, // in ms
-      distanceInterval: 10 // in meters
-    }, async position => await this.getCurrentLocation(position));
-  }
+    await this.getCurrentLocation(position);
+    await this.startWatch();
+  };
 
   toggleSearchResults = () => {
     const { searchResultsOpen } = this.state;
+
+    if (!searchResultsOpen) {
+      this.clearWatch();
+    } else {
+      this.startWatch();
+    }
 
     this.setState({ searchResultsOpen: !searchResultsOpen });
   };
@@ -119,18 +132,33 @@ class Main extends Component {
     this.setState({ destinationText });
   };
 
-  onDestinationChange = destination => {
-    const { title } = destination;
-    this.onDestinationTextChange(title);
-  };
-
   isDestinationTextEmpty = () => {
     const { destinationText } = this.state;
     return destinationText.length === 0;
   };
 
+  selectAddressFromList = (address, isRecentList = false) => {
+    if(isRecentList) {
+      return this.selectAddressFromRecent(address);
+    }
+    const { setFormattedLocation } = this.props;
+    const { description } = address;
+    this.onDestinationTextChange(description);
+    setFormattedLocation(address, true);
+    Actions.prices();
+  };
+
+  selectAddressFromRecent = recent => {
+    const { pickHistoryLocation } = this.props;
+    const { address } = recent;
+    this.onDestinationTextChange(address);
+    pickHistoryLocation(recent, true);
+    Actions.prices();
+  };
+
   render() {
-    const { recentLocations, shortcutLocations } = this.props;
+    const { recentAddresses } = this.props;
+    console.log(this.props);
     const {
       searchResultsOpen,
       sourceText,
@@ -149,12 +177,12 @@ class Main extends Component {
         )}
         <GoogleAutoComplete
           apiKey={GMAPS_APIKEY}
-          debounce={300}
+          debounce={800}
           components="country:fr"
           language="fr"
           minLength={3}
         >
-          {({ handleTextChange, locationResults }) => (
+          {({ handleTextChange, locationResults, fetchDetails }) => (
             <React.Fragment>
               <LocationSearchHeader
                 onPress={this.toggleSearchResults}
@@ -172,17 +200,19 @@ class Main extends Component {
               />
               <LocationButtonGroup
                 visible={!searchResultsOpen}
-                locations={shortcutLocations}
-                onPressLocation={this.onDestinationChange}
+                locations={recentAddresses}
+                onPressLocation={this.selectAddressFromRecent}
               />
               <LocationSearchResults visible={searchResultsOpen}>
                 <SearchResultsList
+                  isRecentList={this.isDestinationTextEmpty()}
                   list={
                     this.isDestinationTextEmpty()
-                      ? recentLocations
+                      ? recentAddresses
                       : locationResults
                   }
-                  onPressResult={item => console.log("clicked item", item)}
+                  fetchDetails={fetchDetails}
+                  onPressResult={this.selectAddressFromList}
                 />
               </LocationSearchResults>
             </React.Fragment>
@@ -214,4 +244,18 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect(mapStateToProps)(Main);
+const mapStateToProps = state => ({
+  ...state.addresses,
+  lastLocation: state.map.lastLocation
+});
+
+const mapDispatchToProps = {
+  setFormattedLocation,
+  pickHistoryLocation,
+  setLocationError
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Main);

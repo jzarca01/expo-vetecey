@@ -1,109 +1,91 @@
-import React, { Component } from 'react'
-import { StyleSheet, View } from 'react-native'
-import { connect } from 'react-redux'
-import { Actions } from 'react-native-router-flux'
-import MapView from 'react-native-maps'
+import React, { Component } from "react";
+import { StyleSheet, View, Text } from "react-native";
+import { connect } from "react-redux";
+import { Actions } from "react-native-router-flux";
 
-import {
-  LocationButtonGroup,
-  LocationSearchHeader,
-  LocationSearchResults,
-  SearchResultsList,
-  NavigationIcon,
-} from '../components'
+import { NavigationIcon, Animation, LocationSearchHeader } from "../components";
 
-const mapStateToProps = (state) => ({
-  recentLocations: state.recentLocations,
-  shortcutLocations: state.recentLocations.slice(0, 3),
-})
+import { setLoading, getPrices, resetPrices } from "../actions/prices.actions";
 
-class Main extends Component {
-
+class Prices extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchResultsOpen: false,
-      sourceText: 'Test',
-      destinationText: '',
-    }
+      destinationText: ""
+    };
   }
 
   componentDidMount() {
-    this.setState({
-      position: {
-        latitude: 51.5033640,
-        longitude: -0.1276250
-      },
-      region: {
-        latitude: 51.5033640,
-        longitude: -0.1276250,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      }
-    })
+    const { getPrices } = this.props;
+    getPrices();
   }
 
-  toggleSearchResults = () => {
-    const { searchResultsOpen } = this.state
-
-    this.setState({ searchResultsOpen: !searchResultsOpen })
-  }
-
-  onSourceTextChange = (sourceText) => {
-    this.setState({ sourceText })
-  }
-
-  onDestinationTextChange = (destinationText) => {
-    this.setState({ destinationText })
-    console.log('prices')
-    Actions.prices()
+  returnToMain() {
+    const { resetPrices } = this.props;
+    resetPrices();
+    Actions.main();
   }
 
   render() {
-    const { recentLocations, shortcutLocations } = this.props
-    const { searchResultsOpen, sourceText, destinationText, region, position } = this.state
+    const {
+      isPricesLoading,
+      isPricesFetched,
+      isPricesError,
+      uberPrices,
+      kaptenPrices,
+      boltPrices,
+      marcelPrices,
+      heetchPrices,
+      lecabPrices,
+      currentLocation,
+      endLocation,
+      createShareLink,
+      cheapest
+    } = this.props;
 
     return (
       <View style={styles.container}>
-        <NavigationIcon
-          icon={searchResultsOpen ? 'arrow-left' : 'hamburger'}
-          onPress={this.toggleSearchResults}
-        />
-        <MapView
-          style={styles.map}
-          region={region}
-        >
-          {position && (
-            <MapView.Circle
-              center={position}
-              radius={300}
-              strokeColor={'transparent'}
-              fillColor={'rgba(112,185,213,0.30)'}
+        <NavigationIcon icon={"arrow-left"} onPress={() => this.returnToMain()} />
+        {isPricesLoading && <Animation />}
+        {isPricesError && <Animation isLoop={false} />}
+        {isPricesFetched && <React.Fragment>
+          <LocationSearchHeader
+            expanded
+            disabledInput
+            sourceText={"test"}
+            destinationText={"test1"}
             />
-          )}
-          {position && (
-            <MapView.Circle
-              center={position}
-              radius={100}
-              strokeColor={'transparent'}
-              fillColor={'#3594BC'}
-            />
-          )}
-        </MapView>
+            <Text>
+              {JSON.stringify(cheapest)}
+            </Text>
+        </React.Fragment>}
       </View>
-    )
+    );
   }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#EEE',
+    backgroundColor: "#EEE"
   },
   map: {
     flex: 1,
-    zIndex: -1,
+    zIndex: -1
   }
-})
+});
 
-export default connect(mapStateToProps)(Main)
+const mapStateToProps = state => ({
+  ...state.prices
+});
+
+const mapDispatchToProps = {
+  setLoading,
+  getPrices,
+  resetPrices
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Prices);

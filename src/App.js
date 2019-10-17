@@ -6,6 +6,7 @@ import Router from './containers/Router'
 
 export default class App extends Component {
   render() {
+    console.log('store', redux.store.getState());
     return (
       <Provider store={redux.store}>
           <Router />

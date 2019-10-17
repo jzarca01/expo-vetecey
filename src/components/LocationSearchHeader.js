@@ -29,6 +29,7 @@ const AnimatableTouchable = Animatable.createAnimatableComponent(
 export default class LocationSearchHeader extends Component {
   static defaultProps = {
     expanded: false,
+    disabledInput: false,
     onPress: () => {},
     onSourceTextChange: () => {},
     onDestinationTextChange: () => {},
@@ -119,11 +120,11 @@ export default class LocationSearchHeader extends Component {
   };
 
   render() {
-    const { expanded, sourceText, destinationText } = this.props;
+    const { expanded, sourceText, destinationText, disabledInput } = this.props;
     const animatableStyles = this.getAnimatableStyles();
 
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, disabledInput ? styles.forPrices : null]}>
         <Animatable.View
           style={[styles.square, animatableStyles.square]}
           transition={transitionProps.square}
@@ -155,22 +156,32 @@ export default class LocationSearchHeader extends Component {
           transition={transitionProps.destinationText}
           pointerEvents={"none"}
         >
-          {(destinationText.length === 0 || !expanded) ? "Où allez-vous ?" : destinationText}
+          {destinationText.length === 0 || !expanded
+            ? "Où allez-vous ?"
+            : destinationText}
         </Animatable.Text>
         <Animatable.View
           style={[styles.destinationBox, animatableStyles.destinationBox]}
           transition={transitionProps.destinationBox}
           pointerEvents={"box-none"}
         >
-          {expanded && (
-            <TextInput
-              ref={"destinationInput"}
-              style={styles.input}
-              value={destinationText}
-              underlineColorAndroid="rgba(0,0,0,0)"
-              onChangeText={text => this.onDestinationTextChange(text)}
-            />
-          )}
+          {expanded &&
+            (disabledInput ? (
+              <Animatable.Text
+                style={[styles.input, styles.sourceText, styles.padding]}
+                pointerEvents={"none"}
+              >
+                {destinationText}
+              </Animatable.Text>
+            ) : (
+              <TextInput
+                ref={"destinationInput"}
+                style={styles.input}
+                value={destinationText}
+                underlineColorAndroid="rgba(0,0,0,0)"
+                onChangeText={text => this.onDestinationTextChange(text)}
+              />
+            ))}
         </Animatable.View>
         <Animatable.View
           style={[styles.sourceBox, animatableStyles.sourceBox]}
@@ -207,6 +218,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     height: "auto",
     width: 600
+  },
+  forPrices: {
+    position: "relative"
   },
   hoverbar: {
     position: "absolute",
@@ -273,5 +287,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
     fontSize: 10,
     paddingHorizontal: 10
+  },
+  padding: {
+    padding: 10
   }
 });

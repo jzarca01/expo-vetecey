@@ -14,14 +14,14 @@ export default class LocationButtonGroup extends Component {
     onPressLocation: () => {},
   }
 
-  renderItem = (location, i) => {
-    const {icon, title} = location
+  renderItem = (location) => {
+    const {icon, address, placeId} = location
     const {onPressLocation} = this.props
 
     return (
       <View
         style={styles.item}
-        key={i}
+        key={placeId}
       >
         <LocationButton
           icon={icon}
@@ -29,7 +29,7 @@ export default class LocationButtonGroup extends Component {
         />
         <View style={styles.itemSpacer} />
         <Text style={styles.itemText}>
-          {title}
+          {address}
         </Text>
       </View>
     )

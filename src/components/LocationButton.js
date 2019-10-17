@@ -6,7 +6,7 @@ import AssetMap from '../config/AssetMap'
 export default class LocationButton extends Component {
 
   static defaultProps = {
-    icon: 'home',
+    icon: 'recent',
     onPress: () => {},
   }
 
