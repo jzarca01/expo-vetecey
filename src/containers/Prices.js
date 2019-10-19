@@ -3,7 +3,7 @@ import { StyleSheet, View, Text } from "react-native";
 import { connect } from "react-redux";
 import { Actions } from "react-native-router-flux";
 
-import { NavigationIcon, Animation, LocationSearchHeader } from "../components";
+import { NavigationIcon, Animation, Loading, LocationSearchHeader, PriceResultsList } from "../components";
 
 import { setLoading, getPrices, resetPrices } from "../actions/prices.actions";
 
@@ -46,7 +46,7 @@ class Prices extends Component {
     return (
       <View style={styles.container}>
         <NavigationIcon icon={"arrow-left"} onPress={() => this.returnToMain()} />
-        {isPricesLoading && <Animation />}
+        {isPricesLoading && <Loading />}
         {isPricesError && <Animation isLoop={false} />}
         {isPricesFetched && <React.Fragment>
           <LocationSearchHeader
@@ -55,9 +55,16 @@ class Prices extends Component {
             sourceText={"test"}
             destinationText={"test1"}
             />
-            <Text>
-              {JSON.stringify(cheapest)}
-            </Text>
+            <PriceResultsList
+              key={"uber"}
+              isError={uberPrices.length === 0}
+              isFetched={isPricesFetched}
+              pricesArray={uberPrices}
+              serviceName={"Uber"}
+              tierProperty={"tier"}
+              priceProperty={"value"}
+              cheapest={cheapest}
+            />
         </React.Fragment>}
       </View>
     );

@@ -13,16 +13,17 @@ const wakeServer = api =>
     url: "/wakeup"
   });
 
-export const setFormattedLocation = (location, isEndLocation = false) => async (
+export const setFormattedLocation = (place, isEndLocation = false) => async (
   dispatch,
   getState,
   { api }
 ) => {
   const {
+    geometry,
     formatted_address,
     address_components,
     place_id
-  } = location;
+  } = place;
 
   const getZipcode = components => {
     const zipComponent = components.filter(comp =>
@@ -40,13 +41,16 @@ export const setFormattedLocation = (location, isEndLocation = false) => async (
 
   try {
     if (getCountry(address_components) === "France") {
+      const { location } = geometry; 
       const selectedAddress = {
         address: !isNil(formatted_address) ? formatted_address : null,
         zipCode: !isNil(address_components)
           ? getZipcode(address_components)
           : null,
         placeId: place_id,
-        ...location
+        latitude: location.lat,
+        longitude: location.lng,
+        ...place
       };
       if (isEndLocation) {
         dispatch({

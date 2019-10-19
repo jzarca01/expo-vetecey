@@ -1,12 +1,11 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
-import Animation from './Animation';
+import Animation from "./Animation";
 
 const Loading = ({ text = "Chargement..." }) => (
   <View style={styles.container}>
-        <Text>{text}</Text>
-    <Animation />
+    <Spinner visible textContent={text} children={<Animation />} />
   </View>
 );
 

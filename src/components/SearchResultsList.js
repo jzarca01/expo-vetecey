@@ -10,7 +10,7 @@ const SearchResultsList = ({
   fetchDetails
 }) => {
   renderRow = ({ item, index }) => {
-    const { title, address, icon, place_id, placeId } = item;
+    const { description, address, place_id, placeId } = item;
 
     return (
       <TouchableHighlight
@@ -26,9 +26,9 @@ const SearchResultsList = ({
       >
         <SearchResultsRow
           key={index}
-          title={isRecentList ? address : title}
+          title={isRecentList ? address : description}
           subtitle={""}
-          icon={isRecentList ? null : icon}
+          icon={isRecentList ? 'recent' : 'location'}
         />
       </TouchableHighlight>
     );
