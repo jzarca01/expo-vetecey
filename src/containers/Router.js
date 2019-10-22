@@ -4,11 +4,12 @@ import { connect } from "react-redux";
 
 import Main from "./Main";
 import Prices from "./Prices";
+import Redirect from './Redirect';
 
 class AppRouter extends Component {
   render() {
     return (
-      <Router>
+      <Router uriPrefix={'vetecey.fr'}>
         <Stack key={"root"}>
           <Scene
             initial
@@ -21,6 +22,19 @@ class AppRouter extends Component {
             key={"prices"}
             component={Prices}
             title={"Prices"}
+            hideNavBar
+          />
+          <Scene
+            key={"staticPrices"}
+            component={Prices}
+            path={'/prices/:priceId'}
+            title={"Prices"}
+            hideNavBar
+          />
+          <Scene
+            key={"redirect"}
+            component={Redirect}
+            title={"Redirect"}
             hideNavBar
           />
         </Stack>

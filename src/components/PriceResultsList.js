@@ -8,7 +8,7 @@ import {
   View
 } from "react-native";
 
-import PriceResultsRow from './PriceResultsRow';
+import { PriceResultsRow } from './PriceResultsRow';
 
 const PriceResultsList = ( {
     isError,
@@ -17,42 +17,50 @@ const PriceResultsList = ( {
     serviceName,
     tierProperty,
     priceProperty,
-    cheapest
+    cheapest,
+    onPressResult
   }) => {
   renderRow = ({ item, index }) => {
     return (
-      <TouchableHighlight
-        onPress={async () => {
-          console.log("price", item);
-          return onPressResult(item);
-        }}
-      >
         <PriceResultsRow
+          onClickOrder={() => onPressResult(item, serviceName)}
           key={index}
           title={item[tierProperty]}
           price={item[priceProperty]}
+          cheapest={item === cheapest}
         />
-      </TouchableHighlight>
     );
   };
 
   console.log("list", pricesArray);
   return (
     <View style={styles.container}>
-      <Text pointerEvents={"none"}>{serviceName}</Text>
-      <FlatList
-        style={styles.container}
-        data={pricesArray}
-        renderItem={this.renderRow}
-        keyExtractor={(item, index) => `${serviceName}-${index}`}
-      />
+      {isError && <React.Fragment>
+        <Text>Une erreur est survenue avec {serviceName}</Text>
+      </React.Fragment>}
+      {isFetched && <React.Fragment>
+        <Text pointerEvents={"none"}>{serviceName}</Text>
+        <FlatList
+          style={styles.list}
+          data={pricesArray}
+          renderItem={this.renderRow}
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyExtractor={(item, index) => `${serviceName}-${index}`}
+        />
+      </React.Fragment>}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    padding: 10,
+    margin: 10
+  },
+  list: {
+    flexGrow: 0,
+    height: "auto"
   },
   row: {
     padding: 15,

@@ -1,14 +1,14 @@
 import { combineReducers } from "redux";
 
 import { persistReducer } from "redux-persist";
-import createSecureStore from "redux-persist-expo-securestore";
+import FSStorage from 'redux-persist-expo-fs-storage';
 
 import mapReducer from "./map.reducer";
 import rootReducer from "./root.reducer";
 import pricesReducer from "./prices.reducer";
 import addressesReducer from "./addresses.reducer";
 
-const storage = createSecureStore();
+const storage = FSStorage();
 
 const rootConfig = {
   key: "root",

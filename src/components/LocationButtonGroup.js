@@ -17,7 +17,7 @@ export default class LocationButtonGroup extends Component {
     const { address, placeId } = location;
     const { onPressLocation } = this.props;
 
-    return (
+    return address && placeId && (
       <View style={styles.item} key={placeId}>
         <LocationButton onPress={onPressLocation.bind(this, location)} />
         <View style={styles.itemSpacer} />

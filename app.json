@@ -23,7 +23,23 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
-    }
+      "bundleIdentifier": "com.zarca-inc.vetecey",
+      "buildNumber": "8",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "supportsTablet": false,
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": [
+          "uber",
+          "chauffeur-p",
+          "taxify",
+          "heetch",
+          "marcel",
+          "lecab"
+        ]
+      }
+    },
+    "description": ""
   }
 }

@@ -78,7 +78,8 @@ export default class LocationSearchHeader extends Component {
       },
       square: {
         top: expanded ? 109 : 96 + 56 / 2 - SQUARE_SIZE / 2,
-        left: expanded ? 29 : 24 + 22
+        left: expanded ? 29 : 24 + 22,
+        opacity: expanded ? 1 : 0
       },
       destinationBox: {
         left: expanded ? 56 : 24,
@@ -238,6 +239,7 @@ const styles = StyleSheet.create({
     width: SQUARE_SIZE,
     height: SQUARE_SIZE,
     backgroundColor: "black",
+    borderRadius: SQUARE_SIZE / 2,
     zIndex: 2
   },
   dot: {

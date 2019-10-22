@@ -5,7 +5,7 @@ import NavigationIcon from "./NavigationIcon";
 import LocationButtonGroup from "./LocationButtonGroup";
 import Animation from './Animation';
 import Loading from "./Loading";
-import PriceResultsRow from './PriceResultsRow';
+import { PriceResultsRow, SpecialPriceResultsRow } from './PriceResultsRow';
 import PriceResultsList from './PriceResultsList';
 
 export {
@@ -17,5 +17,6 @@ export {
   Animation,
   Loading,
   PriceResultsRow,
-  PriceResultsList
+  PriceResultsList,
+  SpecialPriceResultsRow
 };

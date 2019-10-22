@@ -27,6 +27,13 @@ import {
 } from "../components";
 
 class Main extends Component {
+  static defaultProps = {
+    lastLocation: {
+      latitude: 48.503364,
+      longitude: -0.127625
+    }
+  };
+
   constructor(props) {
     super(props);
     const { lastLocation } = this.props;
@@ -138,7 +145,7 @@ class Main extends Component {
   };
 
   selectAddressFromList = (address, isRecentList = false) => {
-    if(isRecentList) {
+    if (isRecentList) {
       return this.selectAddressFromRecent(address);
     }
     const { setFormattedLocation } = this.props;
@@ -246,7 +253,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
   ...state.addresses,
-  lastLocation: state.map.lastLocation
+  //lastLocation: state.map.lastLocation
 });
 
 const mapDispatchToProps = {
